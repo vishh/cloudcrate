@@ -32,6 +32,8 @@ import sys
 import os
 from datetime import datetime
 import pip
+from collections import defaultdict
+
 
 
 try:
@@ -83,7 +85,7 @@ if task == 'sync' :
 	print "====== Syncing Current Directory ====="
 	path = os.path.dirname(os.path.realpath('cloudcrate.py')) + '/'
 	
-	list_of_files = []
+	list_of_files = {}
 
 	for (path,dirs,list_of_files) in os.walk(path):
 		#print list_of_files
@@ -93,29 +95,42 @@ if task == 'sync' :
 	print "===== LIST OF FILES IN DIRECTORY======"
 	print "======================================"
 
+	print type(list_of_files)
+
 	try:
-		print "in try block"
+		print "in try block - this would handle a resyn operation"
 		print os.path.exists("last_modified.txt")
 		last_modified_dict = json.load(open("last_modified.txt"))
 
 		for files in list_of_files:
 			if not files.startswith('.'):
 				#print 'Working on file ' ,files
-				if os.path.getctime(files) > last_modified_dict[files]:
+
+				if (files not in last_modified_dict):
+					last_modified_dict[files] = os.path.getctime(files)
+					#print "Missing file Added to dictionary is ", files
 					print "uploading .." , files
 					k = Key(bucket)
 					k.key = files
 					k.set_contents_from_filename(path+files)
-				else:
-					print "skipping file " , files
+
+				elif (files in last_modified_dict) & (os.path.getctime(files) > last_modified_dict[files]) :
+					print "uploading .." , files
+					k = Key(bucket)
+					k.key = files
+					k.set_contents_from_filename(path+files)
+				
+				else :
+					print "skipping file ",files
+
 
 		bucket.set_acl('public-read')
 
 
-	except: 
+	except IOError: 
 
 		print "in exception block"
-		last_modified_dict = {}
+		last_modified_dict = defaultdict()
 		for files in list_of_files:
 			last_modified_dict[files]= os.path.getctime(files)
 		print last_modified_dict
@@ -128,11 +143,17 @@ if task == 'sync' :
 				k.key = files
 				k.set_contents_from_filename(path+files)
 
+	# except KeyError:
+	# 	print "the file on which this occured is " , KeyError
+
 	bucket.set_acl('public-read')
 
 	print "======================================================================="
 	print "visit http://cloudcrate.hari.s3.amazonaws.com/list.html to take a look at the bucket & uploaded files"
 	print "======================================================================="
+
+
+
 
 
 if task == 'download' :	
