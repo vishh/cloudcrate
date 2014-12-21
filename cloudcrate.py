@@ -144,9 +144,6 @@ if task == 'sync' :
 				k.key = files
 				k.set_contents_from_filename(path+files)
 
-	# except KeyError:
-	# 	print "the file on which this occured is " , KeyError
-
 	bucket.set_acl('public-read')
 
 	print "======================================================================="
@@ -154,31 +151,42 @@ if task == 'sync' :
 	print "======================================================================="
 
 
-
-
-
 if task == 'download' :	
 
+	import json
 	from boto.s3.connection import S3Connection
 	from boto.s3.key import Key
 
+	download_last_modified_dict = {}
 	conn = S3Connection('AKIAJ332D5S6IQ7WITSQ', 'G2WNp8xGxQPSxEcurBOTI32okS/izRmz2KPAJO24')
 	bucket = conn.get_bucket('cloudcrate.hari')
-	if not os.path.exists('/tmp/s3_downloads'):
-		os.mkdir('/tmp/s3_downloads/')
-	path = '/tmp/s3_downloads/' + str(datetime.now())
-	os.mkdir(path)
-	os.chdir(path)
-	print "for this instance of download , the following folder has been created ",path
+	#os.mkdir('~/Desktop/downloaded/')
+
+	if not os.path.exists(os.path.expanduser('~/Desktop/s3_downloads')):
+		os.mkdir(os.path.expanduser('~/Desktop/s3_downloads/'))
+	#path = '/tmp/s3_downloads/' + str(datetime.now())
+	#os.mkdir(path)
+	os.chdir(os.path.expanduser('~/Desktop/s3_downloads')) 
+	#print "for this instance of download , the following folder has been created ",path
+	print "==============================================================================="
+	print "starting file download from S3 Bucket",bucket
+	print "==============================================================================="
+	
 	for key in bucket.list():
 	     try:
+	     	download_last_modified_dict[key.name] = key.last_modified
 	     	downloaded_file = key.get_contents_to_filename(key.name)
 	     	print "Downloaded file",key.name 
+	     	#list_of_downloaded_files.extend[key.name]
+	     	#print "the creation time of this files is " , os.path.getctime(key.name)
 	     except:
 	      	print "FAILED"
-	print "============================================================================"
-	print "for this instance of download , the following folder has been created ",path
-	print "============================================================================"
+
+	#print download_last_modified_dict
+	json.dump(download_last_modified_dict, open("download_last_modified.txt",'w'))
+	print "==============================================================================="
+	print "all files have been downloaded to a folder of name s3_downloads on your desktop"
+	print "==============================================================================="
 
 
 
