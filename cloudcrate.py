@@ -71,6 +71,9 @@ if task == 'sync' :
 	from boto.s3.connection import S3Connection
 	from boto.s3.key import Key
 	import json
+	import time
+	from time import mktime
+	from datetime import datetime
 
 
 	conn = S3Connection('AKIAJ332D5S6IQ7WITSQ', 'G2WNp8xGxQPSxEcurBOTI32okS/izRmz2KPAJO24')
@@ -90,24 +93,20 @@ if task == 'sync' :
 	print "===== LIST OF FILES IN DIRECTORY======"
 	print "======================================"
 
-	files_dict = {}
-	#files_dict[last_modified]
-	for key in bucket:
-		files_dict[key.name] = key.last_modified
-
-	for key,value in files_dict.items():
-		print key ,"     ==>", value
-	json.dump(files_dict,open("last_modified.txt",'w'))
-	#print files_dict
-	
+	last_modified = {}
 	for files in list_of_files:
-	 	if not files.startswith('.'):
-	  		print 'uploading' ,files
-	  		k = Key(bucket)
-	  		k.key = files
-	 		k.set_contents_from_filename(path+files)
+		last_modified[files]= os.path.getctime(files)
+	print last_modified
 
-	bucket.set_acl('public-read')
+	
+	# for files in list_of_files:
+	#  	if not files.startswith('.'):
+	#   		print 'uploading' ,files
+	#   		k = Key(bucket)
+	#   		k.key = files
+	#  		k.set_contents_from_filename(path+files)
+
+	# bucket.set_acl('public-read')
 
 	print "======================================================================="
 	print "visit http://cloudcrate.hari.s3.amazonaws.com/list.html to take a look at the bucket & uploaded files"
