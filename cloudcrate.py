@@ -93,20 +93,42 @@ if task == 'sync' :
 	print "===== LIST OF FILES IN DIRECTORY======"
 	print "======================================"
 
-	last_modified = {}
-	for files in list_of_files:
-		last_modified[files]= os.path.getctime(files)
-	print last_modified
+	try:
+		print "in try block"
+		print os.path.exists("last_modified.txt")
+		last_modified_dict = json.load(open("last_modified.txt"))
 
-	
-	# for files in list_of_files:
-	#  	if not files.startswith('.'):
-	#   		print 'uploading' ,files
-	#   		k = Key(bucket)
-	#   		k.key = files
-	#  		k.set_contents_from_filename(path+files)
+		for files in list_of_files:
+			if not files.startswith('.'):
+				#print 'Working on file ' ,files
+				if os.path.getctime(files) > last_modified_dict[files]:
+					print "uploading .." , files
+					k = Key(bucket)
+					k.key = files
+					k.set_contents_from_filename(path+files)
+				else:
+					print "skipping file " , files
 
-	# bucket.set_acl('public-read')
+		bucket.set_acl('public-read')
+
+
+	except: 
+
+		print "in exception block"
+		last_modified_dict = {}
+		for files in list_of_files:
+			last_modified_dict[files]= os.path.getctime(files)
+		print last_modified_dict
+		json.dump(last_modified_dict, open("last_modified.txt",'w'))
+
+		for files in list_of_files:
+		   	if not files.startswith('.'):
+				print 'uploading file ' ,files
+				k = Key(bucket)
+				k.key = files
+				k.set_contents_from_filename(path+files)
+
+	bucket.set_acl('public-read')
 
 	print "======================================================================="
 	print "visit http://cloudcrate.hari.s3.amazonaws.com/list.html to take a look at the bucket & uploaded files"
