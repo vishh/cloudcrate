@@ -107,21 +107,22 @@ if task == 'sync' :
 				#print 'Working on file ' ,files
 
 				if (files not in last_modified_dict):
-					last_modified_dict[files] = os.path.getctime(files)
+					last_modified_dict[files] = os.path.getmtime(files)
 					#print "Missing file Added to dictionary is ", files
-					print "uploading .." , files
+					print "uploading ..from try block if" , files
 					k = Key(bucket)
 					k.key = files
 					k.set_contents_from_filename(path+files)
+					json.dump(last_modified_dict, open("last_modified.txt",'w'))
 
-				elif (files in last_modified_dict) & (os.path.getctime(files) > last_modified_dict[files]) :
-					print "uploading .." , files
+				elif (files in last_modified_dict) & (os.path.getmtime(files) > last_modified_dict[files]) :
+					print "uploading ..from try block elif" , files
 					k = Key(bucket)
 					k.key = files
 					k.set_contents_from_filename(path+files)
 				
 				else :
-					print "skipping file ",files
+					print "skipping file from try block else ",files
 
 
 		bucket.set_acl('public-read')
@@ -132,13 +133,13 @@ if task == 'sync' :
 		print "in exception block"
 		last_modified_dict = defaultdict()
 		for files in list_of_files:
-			last_modified_dict[files]= os.path.getctime(files)
+			last_modified_dict[files]= os.path.getmtime(files)
 		print last_modified_dict
 		json.dump(last_modified_dict, open("last_modified.txt",'w'))
 
 		for files in list_of_files:
 		   	if not files.startswith('.'):
-				print 'uploading file ' ,files
+				print 'uploading file from IOError Exception' ,files
 				k = Key(bucket)
 				k.key = files
 				k.set_contents_from_filename(path+files)
