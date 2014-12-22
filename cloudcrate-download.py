@@ -32,8 +32,6 @@ import os
 from datetime import datetime
 from collections import defaultdict
 
-
-
 try:
 	task = str(sys.argv[1])
 

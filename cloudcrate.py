@@ -18,12 +18,12 @@ print """
   ============================
   Available tasks:
 
-	setup      ................ Run 'cloudcrate setup' first to setup AWS keys. 
-                                      Example: python cloudcrate.py setup 
+	setup      ................ If you are using cloudcrate for the first time , Run 'cloudcrate setup' to install all dependencies.  
+                                      command: python cloudcrate.py setup 
 	sync       ................ Run Sync from the desired folder to sync to the cloud 
-                                      Example: python cloudcrate.py sync 
+                                      command: python cloudcrate.py sync 
 	download   ................ Run Download followed by destination folder name 
-                                      Example: python cloudcrate.py download <destination_folder_name>
+                                      command: python cloudcrate.py download <destination_folder_name>
  
   """
 
@@ -43,9 +43,12 @@ except IndexError:
 if task == 'setup' :
 	try:
 		import boto
-		print "===================================================================="
+		print "=================================================================================="
 		print "All required libraries have already been installed , proceed to sync"
-		print "===================================================================="
+		print "Please note, your current folder is your 'cloudcrate' copy files in this and sync "
+		print "Example sync command          : python cloudcrate.py sync"
+		print "For list of all commands,type : python cloudcrate.py  "
+		print "=================================================================================="
 
 	except ImportError,e:
 		print "============================================================="
@@ -57,11 +60,12 @@ if task == 'setup' :
 		os.system("tar -zxvf boto.0.tar.gz")
 		os.chdir("boto-2.34.0")
 		os.system("sudo python setup.py install ")
-		print "============================================================="
+		print "=================================================================================="
 		print "All required libraries have been installed, proceed to sync "
+		print "Please note, your current folder is your 'cloudcrate' copy files in this and sync "
 		print "Example sync command : python cloudcrate.py sync"
 		print "For list of all commands : python cloudcrate.py  "
-		print "============================================================="
+		print "=================================================================================="
 
 if task == 'sync' :
 
@@ -73,7 +77,8 @@ if task == 'sync' :
 	from time import mktime
 	from datetime import datetime
 
-	print "Estab"
+	print "Established connection to AWS S3"
+
 	conn = S3Connection('AKIAJ332D5S6IQ7WITSQ', 'G2WNp8xGxQPSxEcurBOTI32okS/izRmz2KPAJO24')
 	bucket = conn.create_bucket('cloudcrate.hari')
 	print "======================================"
