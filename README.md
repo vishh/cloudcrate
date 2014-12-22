@@ -1,12 +1,5 @@
 cloudcrate
 ==========
-       .__                   .___                      __          
-  ____ |  |   ____  __ __  __| _/   ________________ _/  |_  ____  
-_/ ___\|  |  /  _ \|  |  \/ __ |  _/ ___\_  __ \__  \\   __\/ __ \ 
-\  \___|  |_(  <_> )  |  / /_/ |  \  \___|  | \// __ \|  | \  ___/ 
- \___  >____/\____/|____/\____ |   \___  >__|  (____  /__|  \___  >
-     \/                       \/       \/           \/          \/ 
-
 cloudcrate is a simply commandline utility that would allows you to "Bring your own Dropbox" backed by Amazon S3.
 
 1. Please download the cloudcrate zip from here(github).
