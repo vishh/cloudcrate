@@ -31,7 +31,6 @@ print """
 import sys
 import os
 from datetime import datetime
-import pip
 from collections import defaultdict
 
 
@@ -116,10 +115,12 @@ if task == 'sync' :
 					json.dump(last_modified_dict, open("last_modified.txt",'w'))
 
 				elif (files in last_modified_dict) & (os.path.getmtime(files) > last_modified_dict[files]) :
+					last_modified_dict[files] = os.path.getmtime(files)
 					print "uploading ..from try block elif" , files
 					k = Key(bucket)
 					k.key = files
 					k.set_contents_from_filename(path+files)
+					json.dump(last_modified_dict, open("last_modified.txt",'w'))
 				
 				else :
 					print "skipping file from try block else ",files
@@ -163,47 +164,48 @@ if task == 'download' :
 	#os.mkdir('~/Desktop/downloaded/')
 
 	if not os.path.exists(os.path.expanduser('~/Desktop/s3_downloads')):
+		print "Looks like you havent downloaded the files even once"
 		os.mkdir(os.path.expanduser('~/Desktop/s3_downloads/'))
-	#path = '/tmp/s3_downloads/' + str(datetime.now())
-	#os.mkdir(path)
-	os.chdir(os.path.expanduser('~/Desktop/s3_downloads')) 
-	#print "for this instance of download , the following folder has been created ",path
-	print "==============================================================================="
-	print "starting file download from S3 Bucket",bucket
-	print "==============================================================================="
-	
-	for key in bucket.list():
-	     try:
-	     	download_last_modified_dict[key.name] = key.last_modified
-	     	downloaded_file = key.get_contents_to_filename(key.name)
-	     	print "Downloaded file",key.name 
-	     	#list_of_downloaded_files.extend[key.name]
-	     	#print "the creation time of this files is " , os.path.getctime(key.name)
-	     except:
-	      	print "FAILED"
+		print "Created a folder of name s3_downloads on your Desktop"
+		os.chdir(os.path.expanduser('~/Desktop/s3_downloads'))
+		for key in bucket.list():
+				downloaded_file = key.get_contents_to_filename(key.name)
+				download_last_modified_dict[key.name]= key.last_modified
+				print "Downloaded file " , key.name
+		print download_last_modified_dict
+		json.dump(download_last_modified_dict, open("download_last_modified.txt",'w'))
+	else :
 
-	#print download_last_modified_dict
-	json.dump(download_last_modified_dict, open("download_last_modified.txt",'w'))
-	print "==============================================================================="
-	print "all files have been downloaded to a folder of name s3_downloads on your desktop"
-	print "==============================================================================="
+			print "======================================================================="
+			print "the folder existing , will not selectively download files inside"
+			print "======================================================================="
+
+			os.chdir(os.path.expanduser('~/Desktop/s3_downloads'))
+			download_last_modified_dict = json.load(open("download_last_modified.txt"))
+			print "loaded json from file into memory"
+			
+
+			for key in bucket.list():
+				try:
+					if key.last_modified > download_last_modified_dict[key.name]:
+						print "from S3 " ,key.last_modified ,"from file", download_last_modified_dict[key.name]
+						downloaded_file = key.get_contents_to_filename(key.name)
+					else:
+						print "Skipping download of file",key.name
+				except KeyError:
+				#print "KeyError" , key.name
+					downloaded_file = key.get_contents_to_filename(key.name)
+					print "Downloaded",key.name
+					download_last_modified_dict[key.name]=key.last_modified
+					json.dump(download_last_modified_dict, open("download_last_modified.txt",'w'))
 
 
 
-#if task == 'schedule' :
-	
 
 
-# import os
-# path = '/Users/Hari/modashboard'
-# list_of_files = os.listdir(path)
-# print path
-# #print list_of_files
-# # The above line was used only to debug , it prints a list containing all the files 
-# print "======================================"
-# print "===== LIST OF FILES IN DIRECTORY======"
-# print "======================================"
 
-# for files in list_of_files:
-# 	print path+'/'+files
-# 	scp path+'/'+files root@10.115.129.228:/cloudcrate/
+
+
+
+
+
