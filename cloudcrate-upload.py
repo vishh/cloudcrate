@@ -14,18 +14,16 @@ print """
  | |___| | (_) | |_| | (_| |   | |___| | | (_| | ||  __/
   \____|_|\___/ \__,_|\__,_|    \____|_|  \__,_|\__\___|
 
-  Usage : python cloudcrate.py
-  ============================
+  Usage : python cloudcrate-upload.py
+  ===================================
   Available tasks:
 
-	setup      ................ Run 'cloudcrate setup' first to setup AWS keys. 
-                                      Example: python cloudcrate.py setup 
+	setup      ................ Run 'cloudcrate-upload setup' first to setup AWS keys. 
+                                      Example: python cloudcrate-upload.py setup 
 	sync       ................ Run Sync from the desired folder to sync to the cloud 
-                                      Example: python cloudcrate.py sync 
+                                      Example: python cloudcrate-upload.py sync 
 	schedule   ................ Run schedule to cron sync and download every 90 mins
-	download   ................ Run Download followed by destination folder name 
-                                      Example: python cloudcrate.py download <destination_folder_name>
- 
+	
   """
 
 import sys
@@ -62,8 +60,8 @@ if task == 'setup' :
 		os.system("sudo python setup.py install ")
 		print "============================================================="
 		print "All required libraries have been installed, proceed to sync "
-		print "Example sync command : python cloudcrate.py sync"
-		print "For list of all commands : python cloudcrate.py  "
+		print "Example sync command : python cloudcrate-upload.py sync"
+		print "For list of all commands : python cloudcrate-upload.py  "
 		print "============================================================="
 
 
@@ -78,13 +76,14 @@ if task == 'sync' :
 	from time import mktime
 	from datetime import datetime
 
-	print "Estab"
 	conn = S3Connection('AKIAJ332D5S6IQ7WITSQ', 'G2WNp8xGxQPSxEcurBOTI32okS/izRmz2KPAJO24')
+	print "Established connection to AWS S3"
+
 	bucket = conn.create_bucket('cloudcrate.hari')
 	print "======================================"
 
 	print "====== Syncing Current Directory ====="
-	path = os.path.dirname(os.path.realpath('cloudcrate.py')) + '/'
+	path = os.path.dirname(os.path.realpath('cloudcrate-upload.py')) + '/'
 	
 	list_of_files = {}
 
@@ -142,72 +141,13 @@ if task == 'sync' :
 
 		for files in list_of_files:
 		   	if not files.startswith('.'):
-				print 'uploading file from IOError Exception' ,files
+				print 'uploading file from IOError Exception code block' ,files
 				k = Key(bucket)
 				k.key = files
 				k.set_contents_from_filename(path+files)
 
 	bucket.set_acl('public-read')
 
-	print "======================================================================="
+	print "========================================================================================"
 	print "visit http://cloudcrate.hari.s3.amazonaws.com/list.html to take a look at the bucket & uploaded files"
-	print "======================================================================="
-
-
-if task == 'download' :	
-
-	import json
-	from boto.s3.connection import S3Connection
-	from boto.s3.key import Key
-
-	download_last_modified_dict = {}
-	conn = S3Connection('AKIAJ332D5S6IQ7WITSQ', 'G2WNp8xGxQPSxEcurBOTI32okS/izRmz2KPAJO24')
-	bucket = conn.get_bucket('cloudcrate.hari')
-	#os.mkdir('~/Desktop/downloaded/')
-
-	if not os.path.exists(os.path.expanduser('~/Desktop/s3_downloads')):
-		print "Looks like you havent downloaded the files even once"
-		os.mkdir(os.path.expanduser('~/Desktop/s3_downloads/'))
-		print "Created a folder of name s3_downloads on your Desktop"
-		os.chdir(os.path.expanduser('~/Desktop/s3_downloads'))
-		for key in bucket.list():
-				downloaded_file = key.get_contents_to_filename(key.name)
-				download_last_modified_dict[key.name]= key.last_modified
-				print "Downloaded file " , key.name
-		print download_last_modified_dict
-		json.dump(download_last_modified_dict, open("download_last_modified.txt",'w'))
-	else :
-
-			print "============================================================================================="
-			print "the s3_downloads folder already exists , will now selectively download files into this folder"
-			print "============================================================================================="
-
-			os.chdir(os.path.expanduser('~/Desktop/s3_downloads'))
-			download_last_modified_dict = json.load(open("download_last_modified.txt"))
-			print "loaded json from file into memory"
-			
-
-			for key in bucket.list():
-				try:
-					if key.last_modified > download_last_modified_dict[key.name]:
-						print "from S3 " ,key.last_modified ,"from file", download_last_modified_dict[key.name]
-						downloaded_file = key.get_contents_to_filename(key.name)
-					else:
-						print "Skipping download of file",key.name
-				except KeyError:
-				#print "KeyError" , key.name
-					downloaded_file = key.get_contents_to_filename(key.name)
-					print "Downloaded",key.name
-					download_last_modified_dict[key.name]=key.last_modified
-					json.dump(download_last_modified_dict, open("download_last_modified.txt",'w'))
-
-
-
-
-
-
-
-
-
-
-
+	print "========================================================================================"
