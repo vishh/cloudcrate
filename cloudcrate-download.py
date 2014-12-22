@@ -22,7 +22,6 @@ print """
                                       Example: python cloudcrate.py setup 
 	sync       ................ Run Sync from the desired folder to sync to the cloud 
                                       Example: python cloudcrate.py sync 
-	schedule   ................ Run schedule to cron sync and download every 90 mins
 	download   ................ Run Download followed by destination folder name 
                                       Example: python cloudcrate.py download <destination_folder_name>
  

@@ -22,7 +22,6 @@ print """
                                       Example: python cloudcrate.py setup 
 	sync       ................ Run Sync from the desired folder to sync to the cloud 
                                       Example: python cloudcrate.py sync 
-	schedule   ................ Run schedule to cron sync and download every 90 mins
 	download   ................ Run Download followed by destination folder name 
                                       Example: python cloudcrate.py download <destination_folder_name>
  
@@ -32,8 +31,6 @@ import sys
 import os
 from datetime import datetime
 from collections import defaultdict
-
-
 
 try:
 	task = str(sys.argv[1])
@@ -65,8 +62,6 @@ if task == 'setup' :
 		print "Example sync command : python cloudcrate.py sync"
 		print "For list of all commands : python cloudcrate.py  "
 		print "============================================================="
-
-
 
 if task == 'sync' :
 
@@ -166,17 +161,22 @@ if task == 'download' :
 	#os.mkdir('~/Desktop/downloaded/')
 
 	if not os.path.exists(os.path.expanduser('~/Desktop/s3_downloads')):
+		print "===================================================="
 		print "Looks like you havent downloaded the files even once"
+		print "===================================================="
 		os.mkdir(os.path.expanduser('~/Desktop/s3_downloads/'))
 		print "Created a folder of name s3_downloads on your Desktop"
+		print "===================================================="
 		os.chdir(os.path.expanduser('~/Desktop/s3_downloads'))
 		for key in bucket.list():
-				downloaded_file = key.get_contents_to_filename(key.name)
 				download_last_modified_dict[key.name]= key.last_modified
+				downloaded_file = key.get_contents_to_filename(key.name)
+				#print key.last_modified
 				print "Downloaded file " , key.name
-		print download_last_modified_dict
+		#print download_last_modified_dict
 		json.dump(download_last_modified_dict, open("download_last_modified.txt",'w'))
-	else :
+
+	else:
 
 			print "============================================================================================="
 			print "the s3_downloads folder already exists , will now selectively download files into this folder"
@@ -184,30 +184,29 @@ if task == 'download' :
 
 			os.chdir(os.path.expanduser('~/Desktop/s3_downloads'))
 			download_last_modified_dict = json.load(open("download_last_modified.txt"))
-			print "loaded json from file into memory"
-			
+			print "loaded json from file into memory and it looks like below"
+			# for key in download_last_modified_dict:
+			# 	print download_last_modified_dict[key]
 
-			for key in bucket.list():
-				try:
+			# print type(bucket.list())
+			# for key in bucket.list():
+			# 	#print type(key)
+			# 	print key.name, key.last_modified , download_last_modified_dict[key.name]
+
+			try:
+				for key in bucket.list():
 					if key.last_modified > download_last_modified_dict[key.name]:
-						print "from S3 " ,key.last_modified ,"from file", download_last_modified_dict[key.name]
-						downloaded_file = key.get_contents_to_filename(key.name)
+						#print "from S3 " ,key.last_modified ,"from file", download_last_modified_dict[key.name]
+						print "Downloading file based on timestamp comparison",key.name
+						download_last_modified_dict[key.name]= key.last_modified
+						downloaded_file = key.get_contents_to_filename(key.name)			
 					else:
+						#print "Skipping download of file",key.name , "last updated time that I just read from S3",key.last_modified
 						print "Skipping download of file",key.name
-				except KeyError:
+				json.dump(download_last_modified_dict, open("download_last_modified.txt",'w'))
+			except KeyError:
 				#print "KeyError" , key.name
 					downloaded_file = key.get_contents_to_filename(key.name)
-					print "Downloaded",key.name
+					print "Downloaded in the KeyError code block",key.name
 					download_last_modified_dict[key.name]=key.last_modified
 					json.dump(download_last_modified_dict, open("download_last_modified.txt",'w'))
-
-
-
-
-
-
-
-
-
-
-
