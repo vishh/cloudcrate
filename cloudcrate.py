@@ -20,11 +20,10 @@ print """
 
 	setup      ................ If you are using cloudcrate for the first time , Run 'cloudcrate setup' to install all dependencies.  
                                       command: python cloudcrate.py setup 
-	sync       ................ Run Sync from the desired folder to sync to the cloud 
+	sync       ................ Run Sync from the cloudcrate folder to sync to the cloud 
                                       command: python cloudcrate.py sync 
-	download   ................ Run Download followed by destination folder name 
-                                      command: python cloudcrate.py download <destination_folder_name>
- 
+	download   ................ Run Download and all files are automatically downloaded to folder s3_downloads on the Desktop
+                                      command: python cloudcrate.py download 
   """
 
 import sys
@@ -129,7 +128,6 @@ if task == 'sync' :
 
 
 		bucket.set_acl('public-read')
-
 
 	except IOError: 
 

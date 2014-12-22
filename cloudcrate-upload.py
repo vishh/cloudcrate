@@ -42,10 +42,13 @@ except IndexError:
 if task == 'setup' :
 	try:
 		import boto
-		print "===================================================================="
+		print "=================================================================================="
 		print "All required libraries have already been installed , proceed to sync"
-		print "===================================================================="
-
+		print "Please note, your current folder is your 'cloudcrate' copy files in this and sync "
+		print "Example sync command          : python cloudcrate-upload.py sync"
+		print "For list of all commands,type : python cloudcrate-upload.py  "
+		print "=================================================================================="
+		
 	except ImportError,e:
 		print "============================================================="
 		raw_input("Missing Libraries - Press Hit Enter to Install them")
@@ -56,13 +59,12 @@ if task == 'setup' :
 		os.system("tar -zxvf boto.0.tar.gz")
 		os.chdir("boto-2.34.0")
 		os.system("sudo python setup.py install ")
-		print "============================================================="
-		print "All required libraries have been installed, proceed to sync "
-		print "Example sync command : python cloudcrate-upload.py sync"
-		print "For list of all commands : python cloudcrate-upload.py  "
-		print "============================================================="
-
-
+		print "=================================================================================="
+		print "All required libraries have already been installed , proceed to sync"
+		print "Please note, your current folder is your 'cloudcrate' copy files in this and sync "
+		print "Example sync command          : python cloudcrate-upload.py sync"
+		print "For list of all commands,type : python cloudcrate-upload.py  "
+		print "=================================================================================="
 
 if task == 'sync' :
 
